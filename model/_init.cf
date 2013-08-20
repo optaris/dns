@@ -1,0 +1,114 @@
+"""
+    Copyright 2013 KU Leuven Research and Development - iMinds - Distrinet
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+    Administrative Contact: dnet-project-office@cs.kuleuven.be
+    Technical Contact: bart.vanbrabant@cs.kuleuven.be
+"""
+
+entity Zone:
+    """
+        The name of the zone. All records under this zone, that are not part
+        of a delegated zone in this model will be included
+    """
+end
+
+entity ForwardZone extends Zone:
+    string domain
+end
+
+entity ReverseZone extends Zone:
+    string ip_prefix
+end
+
+implement ReverseZone using std::none
+implement ForwardZone using std::none
+
+Zone slave_zones [0:] -- [0:] Server slaves
+Zone master_zones [0:] -- [1:] Server master
+
+entity NetworkName:
+    """
+        This entity represents the name of a network. The ip addresses in the
+        network will get reverse dns names based on the networkname and the
+        name of the host.
+    """
+    string name
+end
+
+implement NetworkName using std::none
+
+NetworkName network_name [1] -- [1] ip::Network network
+
+entity DnsServer extends ip::services::Server:
+    """
+        A dns server
+    """
+    bool recursive
+    # constraint: a dns record should exist for this hostname!
+end
+
+typedef Server as DnsServer(services = ip::services::dns)
+
+entity ClientSettings:
+    """
+        This interface defines the configuration for dns clients
+    """
+    string search
+end
+
+implement ClientSettings using std::none
+
+
+entity Client extends ip::services::Client:
+    """
+        This interface models a recursive dns client
+    """
+    string config
+end
+
+
+Client dns_client [0:1] -- [1] std::Host client
+Client client_config [0:] -- [1]  ClientSettings settings
+Server nameservers   [1:] -- [0:] ClientSettings client_settings
+
+implement Client using resolvConf when os is "linux"
+
+implementation resolvConf:
+    self.host = client
+
+    # force readonly to this value
+    cfg = std::ConfigFile(host = host, path = "/etc/resolv.conf",
+        content = template("dns/resolv.conf.tmpl"))
+   
+    self.config = cfg.content
+end
+
+entity NamedIp extends ip::Alias:
+    """
+        This interface adds an ip alias to an interface and generates the 
+        dns records for it (forward and reverse)
+    """
+    std::hoststring name
+end
+
+implementation addressImpl:
+    # create a reverse ptr record
+    dns::rr::PTR(ipaddress = ipaddress, name = name)
+    dns::rr::Record(record = name, rr_type = "a", value = ipaddress)
+end
+
+implement NamedIp using addressImpl
+
+
