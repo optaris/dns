@@ -33,7 +33,7 @@ entity PTR:
     string ipaddress
 end
 
-implementation pTRImpl:
+implementation pTRImpl for PTR:
     Record(record = dns::ip_to_arpa(ipaddress), value = name, rr_type = "ptr")
 end
 

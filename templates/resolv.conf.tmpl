@@ -1,4 +1,0 @@
-search {{ settings.search | cm("searchdomain", "net") }}
-
-{% for s in settings.nameservers %}nameserver {{ s.host.ip | cm("nameserver", "net ref") }}
-{% endfor %}

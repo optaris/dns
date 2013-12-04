@@ -61,40 +61,6 @@ end
 
 typedef Server as DnsServer(services = ip::services::dns)
 
-entity ClientSettings:
-    """
-        This interface defines the configuration for dns clients
-    """
-    string search
-end
-
-implement ClientSettings using std::none
-
-
-entity Client extends ip::services::Client:
-    """
-        This interface models a recursive dns client
-    """
-    string config
-end
-
-
-Client dns_client [0:1] -- [1] std::Host client
-Client client_config [0:] -- [1]  ClientSettings settings
-Server nameservers   [1:] -- [0:] ClientSettings client_settings
-
-implement Client using resolvConf when os is "linux"
-
-implementation resolvConf:
-    self.host = client
-
-    # force readonly to this value
-    cfg = std::ConfigFile(host = host, path = "/etc/resolv.conf",
-        content = template("dns/resolv.conf.tmpl"))
-   
-    self.config = cfg.content
-end
-
 entity NamedIp extends ip::Alias:
     """
         This interface adds an ip alias to an interface and generates the 
@@ -103,7 +69,7 @@ entity NamedIp extends ip::Alias:
     std::hoststring name
 end
 
-implementation addressImpl:
+implementation addressImpl for NamedIp:
     # create a reverse ptr record
     dns::rr::PTR(ipaddress = ipaddress, name = name)
     dns::rr::Record(record = name, rr_type = "a", value = ipaddress)
