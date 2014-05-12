@@ -22,6 +22,7 @@ entity Zone:
         The name of the zone. All records under this zone, that are not part
         of a delegated zone in this model will be included
     """
+    string hostmaster
 end
 
 entity ForwardZone extends Zone:
