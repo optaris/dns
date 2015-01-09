@@ -15,7 +15,7 @@
 
     Contact: bart@impera.io
 """
-from Imp.plugins.base import plugin
+from impera.plugins.base import plugin
 from operator import attrgetter
 
 @plugin
@@ -27,7 +27,7 @@ def bind_zone_name(zone : "dns::Zone") -> "std::hoststring":
         parts = zone.ip_prefix.split(".")
         parts.reverse()
         addr = ".".join(parts)
-        
+
         return addr + ".in-addr.arpa"
 
     return zone.domain
@@ -40,7 +40,7 @@ def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
     parts = ip_addr.split(".")
     parts.reverse()
     addr = ".".join(parts)
-        
+
     return addr + ".in-addr.arpa"
 
 @plugin
@@ -52,7 +52,7 @@ def records_in_zone(records : "list", zone : "dns::zone") -> "list":
     for record in records:
         if record.record[-len(zone):] == zone:
             return_list.append(record)
-    
+
     return_list = sorted(return_list, key = attrgetter('record'))
 
     return return_list
