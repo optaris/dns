@@ -2,8 +2,8 @@ author: Bart Vanbrabant <bart@impera.io>
 license: Apache 2.0
 name: dns
 source: git@git.impera.io:modules/dns
-version: 0.1.4
+version: 0.1.5
 requires: 
     ip: git@git.impera.io:modules/ip, ">= 0.1"
-    std: git@github.com:bartv/std, ">= 0.1"
+    std: git@git.impera.io:modules/std, ">= 0.1"
 
