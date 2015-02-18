@@ -19,20 +19,6 @@ from impera.plugins.base import plugin
 from operator import attrgetter
 
 @plugin
-def bind_zone_name(zone : "dns::Zone") -> "std::hoststring":
-    """
-        Generate the bind zonename
-    """
-    if hasattr(zone, "ip_prefix"):
-        parts = zone.ip_prefix.split(".")
-        parts.reverse()
-        addr = ".".join(parts)
-
-        return addr + ".in-addr.arpa"
-
-    return zone.domain
-
-@plugin
 def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
     """
         Convert an ip to the addr.arpa notation
@@ -42,20 +28,6 @@ def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
     addr = ".".join(parts)
 
     return addr + ".in-addr.arpa"
-
-@plugin
-def records_in_zone(records : "list", zone : "dns::zone") -> "list":
-    """
-        Return all the records that belong in the given zone
-    """
-    return_list = []
-    for record in records:
-        if record.record[-len(zone):] == zone:
-            return_list.append(record)
-
-    return_list = sorted(return_list, key = attrgetter('record'))
-
-    return return_list
 
 @plugin
 def filter_record(record : "std::hoststring", zone : "dns::zone") -> "std::hoststring":

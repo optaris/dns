@@ -16,65 +16,108 @@
     Contact: bart@impera.io
 """
 
+typedef hoststring as string matching /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.?$/
+
 entity Zone:
-    """
-        The name of the zone. All records under this zone, that are not part
-        of a delegated zone in this model will be included
+    """ A dns zone.
     """
     string hostmaster
-end
-
-entity ForwardZone extends Zone:
     string domain
+    number refresh=7200
+    number retry=600
+    number expiry=1209600
+    number ttl=3600
 end
 
-entity ReverseZone extends Zone:
-    string ip_prefix
-end
-
-implement ReverseZone using std::none
-implement ForwardZone using std::none
+implement Zone using std::none
 
 Zone slave_zones [0:] -- [0:] Server slaves
-Zone master_zones [0:] -- [1:] Server master
+Zone master_zones [0:] -- [1] Server master
 
-entity NetworkName:
-    """
-        This entity represents the name of a network. The ip addresses in the
-        network will get reverse dns names based on the networkname and the
-        name of the host.
-    """
-    string name
-end
-
-implement NetworkName using std::none
-
-NetworkName network_name [1] -- [1] ip::Network network
-
-entity DnsServer extends ip::services::Server:
+entity Server extends ip::services::Server:
     """
         A dns server
     """
-    bool recursive
+    bool recursive=true
     # constraint: a dns record should exist for this hostname!
 end
 
-typedef Server as DnsServer(services = ip::services::dns)
-
-entity NamedIp extends ip::Alias:
+entity Record:
     """
-        This interface adds an ip alias to an interface and generates the 
-        dns records for it (forward and reverse)
+        A generic dns resource record
     """
-    std::hoststring name
+    string resource=""
+    string value
+    string record_type
 end
 
-implementation addressImpl for NamedIp:
-    # create a reverse ptr record
-    dns::rr::PTR(ipaddress = ipaddress, name = name)
-    dns::rr::Record(record = name, rr_type = "a", value = ipaddress)
+Record records [0:] -- [1] Zone zone
+
+entity A extends Record:
+    """ An A record
+        
+        :param ipaddress: The address to point this record to
+    """
+    ip::ip ipaddress
+end
+implement A using aImpl
+
+implementation aImpl for A:
+    self.record_type = "a"
+    self.value = self.ipaddress
 end
 
-implement NamedIp using addressImpl
+entity NS extends Record:
+    hoststring server
+end
+implement NS using nsImpl
 
+implementation nsImpl for NS:
+    self.value = self.server
+    self.record_type = "ns"
+end
+
+entity Cname extends Record:
+
+end
+implement Cname using cnameImpl
+
+implementation cnameImpl for Cname:
+    self.record_type = "cname"
+end
+
+entity MX extends Record:
+    hoststring server
+    number priority=10
+end
+implement MX using mxImpl
+
+implementation mxImpl for MX:
+    self.record_type = "mx"
+    self.value = "{{ priority }} {{ server }}"
+end
+
+entity AAAA extends Record:
+    string ipaddress
+end
+implement AAAA using aaaaImpl
+
+implementation aaaaImpl for AAAA:
+    self.record_type = "aaaa"
+    self.value = self.ipaddress
+end
+
+entity PTR extends Record:
+    string name
+    ip::ip ipaddress
+end
+
+implementation ptrImpl for PTR:
+    self.resource = dns::ip_to_arpa(ipaddress)
+    self.value = name
+    self.record_type = "ptr"
+end
+
+implement Record using std::none
+implement PTR using ptrImpl
 
