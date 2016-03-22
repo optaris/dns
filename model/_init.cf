@@ -1,5 +1,5 @@
 """
-    Copyright 2015 Impera
+    Copyright 2016 Inmanta
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -13,7 +13,7 @@
     See the License for the specific language governing permissions and
     limitations under the License.
 
-    Contact: bart@impera.io
+    Contact: bart@inmanta.com
 """
 
 typedef hoststring as string matching /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.?$/
@@ -39,6 +39,7 @@ entity Server extends ip::services::Server:
         A dns server
     """
     bool recursive=true
+    string allow_recursion=""
     # constraint: a dns record should exist for this hostname!
 end
 
@@ -120,4 +121,15 @@ end
 
 implement Record using std::none
 implement PTR using ptrImpl
+
+entity TXT extends Record:
+    string data
+end
+
+implementation txtImpl for TXT:
+    self.record_type = "TXT"
+    self.value = dns::quote(self.data)
+end
+
+implement TXT using txtImpl
 

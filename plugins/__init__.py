@@ -36,3 +36,6 @@ def filter_record(record : "std::hoststring", zone : "dns::zone") -> "std::hosts
     """
     return record[:-(len(zone) + 1)]
 
+@plugin
+def quote(data: "string") -> "string":
+    return "\"" + data + "\""
