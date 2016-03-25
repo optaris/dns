@@ -29,12 +29,24 @@ entity Zone:
     number ttl=3600
 end
 
+entity SlaveZone extends Zone:
+
+end
+
 implement Zone using std::none
 
-Zone slave_zones [0:] -- [0:] Server slaves
-Zone master_zones [0:] -- [1] Server master
+implement SlaveZone using std::none
 
-entity Server extends ip::services::Server:
+Zone slave_zones [0:] -- [0:] DnsServer slaves
+Zone master_zones [0:] -- [1] DnsServer master
+
+entity DnsServer:
+    ip::ip ipaddress
+end
+
+implement DnsServer using std::none
+
+entity Server extends ip::services::Server, DnsServer:
     """
         A dns server
     """
