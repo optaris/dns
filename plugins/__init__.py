@@ -30,7 +30,7 @@ def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
     return addr + ".in-addr.arpa"
 
 @plugin
-def filter_record(record : "std::hoststring", zone : "dns::zone") -> "std::hoststring":
+def filter_record(record : "std::hoststring", zone : "dns::Zone") -> "std::hoststring":
     """
         Filter the zone part from the record
     """
