@@ -15,7 +15,7 @@
 
     Contact: bart@impera.io
 """
-from impera.plugins.base import plugin
+from impera.plugins import plugin
 from operator import attrgetter
 
 @plugin
