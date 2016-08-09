@@ -54,6 +54,7 @@ entity Server extends ip::services::Server, DnsServer:
     """
     bool recursive=true
     string allow_recursion=""
+    string forwarders=""
     # constraint: a dns record should exist for this hostname!
 end
 
