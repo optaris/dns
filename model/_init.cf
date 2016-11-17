@@ -29,15 +29,24 @@ entity Zone:
     number retry=600
     number expiry=1209600
     number ttl=3600
+    bool add_ns=false
 end
 
 entity SlaveZone extends Zone:
 
 end
 
-implement Zone using std::none
+implementation addNS for Zone:
+    NS(server="{{master.host.name}}.", zone=self)
+#    for slave in slaves:
+#        NS(server="{{slave.host.name}}.", zone=self)
+#    end
+end
 
+implement Zone using std::none
 implement SlaveZone using std::none
+
+implement Zone using addNS when add_ns
 
 Zone slave_zones [0:] -- [0:] DnsServer slaves
 Zone master_zones [0:] -- [1] DnsServer master
