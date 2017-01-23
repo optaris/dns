@@ -19,7 +19,7 @@ from inmanta.plugins import plugin
 from operator import attrgetter
 
 @plugin
-def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
+def ip_to_arpa(ip_addr : "ip::ip") -> "dns::hoststring":
     """
         Convert an ip to the addr.arpa notation
     """
@@ -27,7 +27,7 @@ def ip_to_arpa(ip_addr : "ip::ip") -> "std::hoststring":
     parts.reverse()
     addr = ".".join(parts)
 
-    return addr + ".in-addr.arpa"
+    return addr + ".in-addr.arpa."
 
 @plugin
 def filter_record(record : "std::hoststring", zone : "dns::Zone") -> "std::hoststring":

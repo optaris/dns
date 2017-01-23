@@ -18,7 +18,7 @@
 import ip
 import ip::services
 
-typedef hoststring as string matching /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.?$/
+typedef hoststring as string matching /^[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\.$/
 
 entity Zone:
     """ A dns zone.
@@ -71,7 +71,7 @@ entity Record:
     """
         A generic dns resource record
     """
-    string resource=""
+    string resource
     string value
     string record_type
 end
@@ -80,7 +80,7 @@ Record records [0:] -- [1] Zone zone
 
 entity A extends Record:
     """ An A record
-        
+
         :param ipaddress: The address to point this record to
     """
     ip::ip ipaddress
@@ -99,6 +99,7 @@ implement NS using nsImpl
 
 implementation nsImpl for NS:
     self.value = self.server
+    self.resource = ""
     self.record_type = "ns"
 end
 
@@ -156,4 +157,3 @@ implementation txtImpl for TXT:
 end
 
 implement TXT using txtImpl
-
